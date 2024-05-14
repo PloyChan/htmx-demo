@@ -12,11 +12,11 @@
                 <p class="mt-2 text-sm text-gray-700">A list of all your contacts.</p>
             </div>
             <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-                <button type="button"
-                        th:href="@{/contacts/new}"
-                        class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                <a type="button"
+                   th:href="@{/contacts/new}"
+                   class="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                     Add user
-                </button>
+                </a>
             </div>
         </div>
         <div class="flex gap-x-2 items-center">
@@ -25,12 +25,32 @@
                 <label for="search" class="text-sm font-medium leading-6 text-gray-900">Search</label>
                 <input type="search" name="q" id="search"
                        th:value="${query}"
+                       hx:get="@{/contacts}"
+                       hx-trigger="search, keyup delay:200ms changed"
+                       hx-target="tbody"
+                       hx-swap="outerHTML"
+                       hx-push-url="true"
+                       hx-indicator="#spinner"
                        class="rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 >
-                <button type="submit"
-                        class="text-indigo-400 hover:text-indigo-900">Search
-                </button>
             </form>
+            <button type="submit"
+                    class="text-indigo-400 hover:text-indigo-900">Search
+            </button>
+            <div class="mt-4 flex">
+                <div id="archive-ui" hx-target="this" hx-swap="outerHTML" class="h-8 w-80">
+                    <button hx:post="@{/contacts/archives}"
+                            class="button-secondary">
+                        Download archive
+                    </button>
+                </div>
+            </div>
+            <svg id="spinner"
+                 class="htmx-indicator animate-spin ml-3 mr-3 h-5 w-5 text-black"
+                 xmlns="http://www.w3.org/2000/svg"
+                 fill="none" viewBox="0 0 24 24">
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
         </div>
         <div class="mt-8 flow-root">
             <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -59,11 +79,51 @@
                                    th:href="@{/contacts/{id}/edit(id=${contact.id.value()})}">Edit</a>
                                 <a class="text-indigo-400 hover:text-indigo-900"
                                    th:href="@{/contacts/{id}(id=${contact.id.value()})}">View</a>
+                                <a href="#"
+                                   class="text-indigo-400 hover:text-indigo-900"
+                                   hx:delete="@{/contacts/{id}(id=${contact.id.value()})}"
+                                   hx:confirm="|Are you sure you want to delete the contact ${contact.givenName} ${contact.familyName}?|"
+                                   hx-swap="outerHTML swap:1s"
+                                   hx-target="closest tr">Delete</a>
                             </td>
                         </tr>
-
+                        <!--                        <tr th:if="${(page + 1) * size < totalElements}">-->
+                        <!--                            <td colspan="4">-->
+                        <!--                                <div class="flex justify-center mt-4">-->
+                        <!--                                    <button class="button-secondary w-32 text-center"-->
+                        <!--                                            hx:get="@{/contacts(page=${page + 1})}"-->
+                        <!--                                            hx-select="tbody > tr"-->
+                        <!--                                            hx-target="closest tr"-->
+                        <!--                                            hx-swap="outerHTML">-->
+                        <!--                                        Load more-->
+                        <!--                                    </button>-->
+                        <!--                                </div>-->
+                        <!--                            </td>-->
+                        <!--                        </tr>-->
+                        <!--                        เลื่อน scoll แล้วโหลดข้อมูลเรื่อยๆ-->
+                        <tr th:if="${(page + 1) * size < totalElements}">
+                            <td colspan="4">
+                                <div class="flex justify-center mt-4">
+                                    <span
+                                            hx:get="@{/contacts(page=${page + 1},q=${query})}"
+                                            hx-trigger="revealed"
+                                            hx-select="tbody > tr"
+                                            hx-target="closest tr"
+                                            hx-swap="outerHTML">
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
+                    <div class="flex justify-between mt-4">
+                        <a th:href="${page > 0}?@{/contacts(page=${page - 1})}:'#'"
+                           class="button-secondary w-32 text-center"
+                           th:classappend="${page == 0?'disabled':null}">Previous</a>
+                        <a th:href="${(page + 1) * size < totalElements}?@{/contacts(page=${page + 1})}:'#'"
+                           class="button-secondary w-32 text-center"
+                           th:classappend="${(page + 1) * size >= totalElements?'disabled':null}">Next</a>
+                    </div>
                 </div>
             </div>
         </div>

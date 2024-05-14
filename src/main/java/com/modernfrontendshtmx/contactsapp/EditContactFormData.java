@@ -1,9 +1,10 @@
 package com.modernfrontendshtmx.contactsapp;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-@NoDuplicateContactsByEmail
-public class CreateContactFormData {
+public class EditContactFormData {
+    private Long id;
     @NotBlank
     private String givenName;
     @NotBlank
@@ -12,6 +13,25 @@ public class CreateContactFormData {
     private String phone;
     @Email
     private String email;
+
+    public static EditContactFormData form(Contact contact) {
+        EditContactFormData formData = new EditContactFormData();
+        formData.setId(contact.getId().value());
+        formData.setGivenName(contact.getGivenName());
+        formData.setEmail(contact.getEmail());
+        formData.setPhone(contact.getPhone());
+        formData.setFamilyName(contact.getFamilyName());
+
+        return formData;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getGivenName() {
         return givenName;
@@ -44,5 +64,5 @@ public class CreateContactFormData {
     public void setEmail(String email) {
         this.email = email;
     }
-}
 
+}

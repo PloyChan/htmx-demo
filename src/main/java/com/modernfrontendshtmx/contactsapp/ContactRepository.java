@@ -9,4 +9,11 @@ public interface ContactRepository {
     List<Contact> findAll();
     List<Contact> findAllWithNameContaining(String query);
     Optional<Contact> findById(ContactId contactId);
+    void deleteById(ContactId contactId);
+    boolean existsByEmail(String email);
+    Page<Contact> findAllOrderedByName(int page,
+                                       int size);
+    Page<Contact> findAllWithNameContaining(String query,
+                                            int page,
+                                            int size);
 }
